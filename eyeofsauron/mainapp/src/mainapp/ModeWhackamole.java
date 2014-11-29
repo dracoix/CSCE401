@@ -38,6 +38,10 @@ public class ModeWhackamole extends AbstractMode {
     long MAX_DELAY = 1000;
     int MAX_MOLES = 1;
 
+    public ModeWhackamole(AbstractMode nextMode) {
+        super(nextMode);
+    }
+
     public void SetDifficulty(int level) {
         MAX_MOLES = level;
         MAX_DELAY = (int) (1000 / Math.log1p(level));
