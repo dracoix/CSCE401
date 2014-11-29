@@ -124,17 +124,7 @@ public class ModeWhackamole extends AbstractMode {
         if (m.garbage()) {
             return;
         }
-
         m.tick(true);
-        if (m.getPosition().collides(myHammer.getPosition(), senseRange)) {
-            m.hammerPower++;
-            if (m.hammerPower > 15) {
-                myHammer.tick(false);
-                m.whackMe();
-            } else {
-                m.hammerPower = 0;
-            }
-        }
     }
 
     private void renderBackground(Canvas c) {
@@ -185,7 +175,9 @@ public class ModeWhackamole extends AbstractMode {
         @Override
         public void destroy() {
             super.destroy();
-            childMole.destroy();
+            if (childMole != null) {
+                childMole.destroy();
+            }
         }
 
         public void tick() {
@@ -207,6 +199,14 @@ public class ModeWhackamole extends AbstractMode {
         long hoverTimeAccumulated;
 
         BetterPoint2D position = new BetterPoint2D();
+
+        public Hammer() {
+
+        }
+
+        public void setHoverTimeRequired(long ms) {
+            this.hoverTimeRequired = ms;
+        }
 
         public BetterPoint2D getPosition() {
             return this.position;
@@ -249,7 +249,6 @@ public class ModeWhackamole extends AbstractMode {
         boolean whacked;
         long timeUntilHide;
         long timeUntilDeath = Long.MAX_VALUE;
-        int hammerPower;
 
         BetterPoint2D position;
         BetterPoint2D renderPosition = new BetterPoint2D();
@@ -265,6 +264,7 @@ public class ModeWhackamole extends AbstractMode {
 
         public Mole(BetterPoint2D sync) {
             this.position = sync;
+            timeUntilHide = (long) (MAX_DELAY + (BetterUtils.Random.nextDouble() * MAX_DELAY));
         }
 
         public void whackMe() {
@@ -275,13 +275,13 @@ public class ModeWhackamole extends AbstractMode {
         }
 
         @Override
-        public void tick(boolean proceed) {
+        public void tick(boolean nextAnimation) {
             if (time() > timeUntilDeath) {
                 this.destroy();
                 return;
             }
 
-            super.tick(proceed);
+            super.tick(nextAnimation);
 
         }
 

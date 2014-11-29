@@ -46,7 +46,7 @@ public abstract class AnimatedObject extends BetterObject {
         aniSet.add(aniDecayed);
     }
 
-    private Image proceed() {
+    private Image firstAniFrame() {
         if (aniSet.size() == 0)
         {
             this.destroy();
@@ -56,9 +56,9 @@ public abstract class AnimatedObject extends BetterObject {
         return curAni.getCurrentFrame();
     }
 
-    public void tick(boolean proceed) {
-        if (proceed) {
-            curFrame = proceed();
+    public void tick(boolean nextAnimation) {
+        if (nextAnimation) {
+            curFrame = firstAniFrame();
         } else {
             curFrame = curAni.step();
         }

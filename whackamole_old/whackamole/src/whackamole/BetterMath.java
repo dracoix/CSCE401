@@ -1,24 +1,21 @@
+package whackamole;
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package mainapp;
-
 /**
  *
  * @author Expiscor
  */
-public abstract class BetterObject {
+public class BetterMath {
 
-    boolean garbage;
-    
-    public boolean garbage() {
-        return this.garbage;
+    public static double sqr(double x) {
+        return x * x;
     }
 
-    public void destroy() {
-        garbage = true;
+    public static double rms(double a, double b) {
+        return Math.sqrt((sqr(a) + sqr(b)) / 2);
     }
-    
 }
