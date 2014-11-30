@@ -16,16 +16,15 @@ public class BetterUtils {
     }
 
     public static final clsRandom Random = new clsRandom();
-    
+
     public static final class clsRandom {
 
         private static long rnd() {
             return mg2003(proc() ^ mg2003(proc()));
         }
-        
-        private static long proc()
-        {
-            return  mg2003(System.nanoTime() * System.currentTimeMillis());
+
+        private static long proc() {
+            return mg2003(System.nanoTime() * System.currentTimeMillis());
         }
 
         private static long mg2003(long x) {
@@ -39,24 +38,20 @@ public class BetterUtils {
         public long nextLong() {
             return rnd();
         }
-        
-        public int nextInt()
-        {
+
+        public int nextInt() {
             return (int) rnd();
         }
-        
-        public int nextInt(int m)
-        {
+
+        public int nextInt(int m) {
             return Math.abs(nextInt()) % m;
         }
-        
-        public double nextDouble()
-        {
-            return Math.abs((double) rnd() / ((double)Long.MAX_VALUE));
+
+        public double nextDouble() {
+            return Math.abs((double) rnd() / ((double) Long.MAX_VALUE));
         }
-        
-        public float nextFloat()
-        {
+
+        public float nextFloat() {
             return (float) nextDouble();
         }
     }

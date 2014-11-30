@@ -5,10 +5,26 @@
  */
 package mainapp;
 
+import javafx.scene.canvas.Canvas;
+
 /**
  *
  * @author Expiscor
  */
-public class ModeScore {
-    
+public class ModeScore extends AbstractMode {
+
+    public ModeScore(AbstractMode nextMode) {
+        super(nextMode);
+    }
+
+    @Override
+    public void init(Object[] args) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public void tick(Canvas c) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

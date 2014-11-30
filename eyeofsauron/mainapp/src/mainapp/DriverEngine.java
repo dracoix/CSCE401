@@ -25,7 +25,8 @@ import static mainapp.CoreEngine.SCENE_SURFACE;
 public class DriverEngine {
 
     private Timeline MAINLOOP;
-    AbstractMode CurrentMode= new ModeMenu(null);
+    AbstractMode CurrentMode = new ModeMenu(null);
+
     public DriverEngine() {
 
         CoreEngine.prepEngine();
@@ -36,7 +37,6 @@ public class DriverEngine {
         Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
         SCENE_SURFACE.setCursor(Cursor.NONE);
         primaryStage.setScene(SCENE_SURFACE);
-
 
         try {
             Thread.sleep(1000);
@@ -55,9 +55,9 @@ public class DriverEngine {
     }
 
     public void tick() {
-        
+
         CoreEngine.FUZZY_MOUSE.MidpointAndSet(CoreEngine.SCREEN_MOUSE);
-        
+
         if (CurrentMode.running()) {
             CurrentMode.tick(CANVAS_SURFACE);
         } else {

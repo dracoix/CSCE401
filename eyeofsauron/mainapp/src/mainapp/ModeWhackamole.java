@@ -150,11 +150,11 @@ public class ModeWhackamole extends AbstractMode {
     }
 
     private void renderShadow(Canvas c) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
     }
 
     private void renderHammer(Canvas c) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+
     }
 
     class Slot extends BetterObject {

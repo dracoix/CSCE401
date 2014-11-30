@@ -26,5 +26,5 @@ public class ModeCalib extends AbstractMode {
     public void tick(Canvas c) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
+
 }
