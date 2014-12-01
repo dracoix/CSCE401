@@ -25,7 +25,7 @@ public class MainApp extends Application {
         primaryStage.initStyle(StageStyle.UNDECORATED);
 
         primaryStage.centerOnScreen();
-        primaryStage.setFullScreen(false);
+        primaryStage.setFullScreen(true);
 
         primaryStage.addEventHandler(MouseEvent.MOUSE_MOVED, (MouseEvent t) -> {
             CoreEngine.SCREEN_MOUSE.set(t.getSceneX(), t.getSceneY());

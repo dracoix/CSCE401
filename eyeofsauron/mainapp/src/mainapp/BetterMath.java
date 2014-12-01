@@ -24,4 +24,9 @@ public class BetterMath {
     public static double hyp2(double x, double y) {
         return sqr(x) + sqr(y);
     }
+    
+    public static double rms(double a, double b)
+    {
+        return Math.sqrt(hyp2(a,b)/2);
+    }
 }

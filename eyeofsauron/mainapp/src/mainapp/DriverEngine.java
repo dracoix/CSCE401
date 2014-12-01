@@ -57,7 +57,7 @@ public class DriverEngine {
     public void tick() {
 
         CoreEngine.FUZZY_MOUSE.MidpointAndSet(CoreEngine.SCREEN_MOUSE);
-
+        CoreEngine.tickFuzzyAdj();
         if (CurrentMode.running()) {
             CurrentMode.tick(CANVAS_SURFACE);
         } else {

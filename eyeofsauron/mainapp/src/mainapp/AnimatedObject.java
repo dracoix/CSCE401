@@ -58,9 +58,9 @@ public abstract class AnimatedObject extends BetterObject {
 
     public void tick(boolean nextAnimation) {
         if (nextAnimation) {
-            curFrame = firstAniFrame();
+            //curFrame = firstAniFrame();
         } else {
-            curFrame = curAni.step();
+            //curFrame = curAni.step();
         }
     }
 }

@@ -5,12 +5,15 @@
  */
 package mainapp;
 
+import com.sun.scenario.effect.Effect;
 import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.effect.BoxBlur;
+import javafx.scene.paint.Color;
+import static mainapp.BetterUtils.time;
+import static mainapp.CoreEngine.SCREEN_WIDTH;
+import static mainapp.CoreEngine.*;
 
-/**
- *
- * @author Expiscor
- */
 public class ModeCalib extends AbstractMode {
 
     public ModeCalib(AbstractMode nextMode) {
@@ -22,8 +25,140 @@ public class ModeCalib extends AbstractMode {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    final String strTitle = "Get Ready To Follow The Circle!";
+    String strCountDown = "";
+
+    private long countDown = time();
+
+    boolean ready;
+    boolean done;
+
+    BoxBlur bb = new BoxBlur(4, 4, 2);
+
     @Override
     public void tick(Canvas c) {
+
+        if (ready) {
+            getGC(c).setFill(Color.BLACK.interpolate(Color.TRANSPARENT, 0.5));
+            getGC(c).fillRect(0, 0, c.getWidth(), c.getHeight());
+            bb.setHeight(5 + BetterUtils.Random.nextInt(20));
+            bb.setWidth(bb.getHeight());
+            bb.setIterations(5 + BetterUtils.Random.nextInt(20));
+            c.setEffect(bb);
+            eyeFollow(getGC(c));
+        } else {
+            getGC(c).clearRect(0, 0, c.getWidth(), c.getHeight());
+            runCountDown(getGC(c));
+        }
+        if (done) {
+            ready = false;
+            done = false;
+            nextMode.startMode();
+            this.endMode();
+        }
+    }
+
+    private GraphicsContext getGC(Canvas c) {
+        return c.getGraphicsContext2D();
+    }
+
+    private double circleX = SCREEN_WIDTH / 2;
+    private double circleY = SCREEN_HEIGHT / 2;
+
+    private int side = 0;
+
+    private void eyeFollow(GraphicsContext gc) {
+
+        switch (side) {
+            case 0:
+                //Center to Top
+                circleY -= 10;
+                if (circleY <= 40) {
+                    circleY = 40;
+                    side = 1;
+                }
+                break;
+            case 1:
+                //Top Center to Top Right
+                circleX += 10;
+                if (circleX >= SCREEN_WIDTH - 40) {
+                    circleX = SCREEN_WIDTH - 40;
+                    side = 2;
+                }
+                break;
+            case 2:
+                //Top Right to Bottom Right;
+                circleY += 10;
+                if (circleY >= SCREEN_HEIGHT - 40) {
+                    circleY = SCREEN_HEIGHT - 40;
+                    side = 3;
+                }
+                break;
+            case 3:
+                //Bottom Right to Bottom Left;
+                circleX -= 10;
+                if (circleX <= 40) {
+                    circleX = 40;
+                    side = 4;
+                }
+                break;
+            case 4:
+                //Bottom Left to To Left;
+                circleY -= 10;
+                if (circleY <= 40) {
+                    circleY = 40;
+                    side = 5;
+                }
+                break;
+            case 5:
+                getGC(CANVAS_DEBUG).clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+                done = true;
+                return;
+        }
+
+        gc.setFill(Color.RED.interpolate(Color.YELLOW, BetterUtils.Random.nextFloat() * 0.8));
+        gc.fillOval(circleX - 20, circleY - 20, 40, 40);
+
+        calibrate();
+
+        getGC(CANVAS_DEBUG).clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        getGC(CANVAS_DEBUG).setStroke(Color.WHITE);
+        getGC(CANVAS_DEBUG).strokeRect(CALIB_ADJ_MIN_X, CALIB_ADJ_MIN_Y, CALIB_ADJ_MAX_X - CALIB_ADJ_MIN_X, CALIB_ADJ_MAX_Y - CALIB_ADJ_MIN_Y);
+        getGC(CANVAS_DEBUG).setFill(Color.RED.interpolate(Color.TRANSPARENT, 0.5));
+        getGC(CANVAS_DEBUG).fillOval(calcFuzzyX() - 10, calcFuzzyY() - 10, 20, 20);
+
+        getGC(CANVAS_DEBUG).setFill(Color.YELLOW.interpolate(Color.TRANSPARENT, 0.5));
+
+        endCalib();
+        getGC(CANVAS_DEBUG).fillRect(CALIB_ADJ_MIN_X, CALIB_ADJ_MIN_Y, (CALIB_ADJ_MAX_X - CALIB_ADJ_MIN_X), (CALIB_ADJ_MAX_Y - CALIB_ADJ_MIN_Y));
+        getGC(CANVAS_DEBUG).setFill(Color.BLUE);
+        getGC(CANVAS_DEBUG).fillOval(FUZZY_MOUSE.getX() - 2, FUZZY_MOUSE.getY() - 2, 4, 4);
+
+    }
+
+    private int startCountFrom = 3;
+    private long currentTick = 0;
+
+    private void runCountDown(GraphicsContext gc) {
+
+        currentTick = startCountFrom - ((time() - countDown) / 1000);
+        strCountDown = currentTick + "";
+
+        if (currentTick < 0) {
+            strCountDown = "GO!";
+
+        }
+        if (currentTick < -1) {
+            ready = true;
+            resetCalib();
+        }
+        gc.setFont(fntImpact48);
+        gc.setFill(Color.WHITE);
+        gc.fillText(strTitle, SCREEN_WIDTH / 2 - getFontWidth(gc, strTitle) / 2, SCREEN_HEIGHT / 2);
+        gc.fillText(strCountDown, SCREEN_WIDTH / 2 - getFontWidth(gc, strCountDown) / 2, SCREEN_HEIGHT / 2 + getFontHeight(gc));
+    }
+
+    private void updateObjects() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
