@@ -23,7 +23,7 @@ public class ModeScore extends AbstractMode {
     }
 
     @Override
-    public void tick(Canvas c) {
+    public void tick() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

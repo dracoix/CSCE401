@@ -34,6 +34,6 @@ public abstract class AbstractMode {
         this.running = false;
     }
 
-    public abstract void tick(Canvas c);
+    public abstract void tick();
 
 }

@@ -36,19 +36,19 @@ public class ModeCalib extends AbstractMode {
     BoxBlur bb = new BoxBlur(4, 4, 2);
 
     @Override
-    public void tick(Canvas c) {
+    public void tick() {
 
         if (ready) {
-            getGC(c).setFill(Color.BLACK.interpolate(Color.TRANSPARENT, 0.5));
-            getGC(c).fillRect(0, 0, c.getWidth(), c.getHeight());
+            getGC(CANVAS_SURFACE).setFill(Color.BLACK.interpolate(Color.TRANSPARENT, 0.5));
+            getGC(CANVAS_SURFACE).fillRect(0, 0, CANVAS_SURFACE.getWidth(), CANVAS_SURFACE.getHeight());
             bb.setHeight(5 + BetterUtils.Random.nextInt(20));
             bb.setWidth(bb.getHeight());
             bb.setIterations(5 + BetterUtils.Random.nextInt(20));
-            c.setEffect(bb);
-            eyeFollow(getGC(c));
+            CANVAS_SURFACE.setEffect(bb);
+            eyeFollow(getGC(CANVAS_SURFACE));
         } else {
-            getGC(c).clearRect(0, 0, c.getWidth(), c.getHeight());
-            runCountDown(getGC(c));
+            CanvasWipe(CANVAS_SURFACE);
+            runCountDown(getGC(CANVAS_SURFACE));
         }
         if (done) {
             ready = false;
@@ -66,13 +66,15 @@ public class ModeCalib extends AbstractMode {
     private double circleY = SCREEN_HEIGHT / 2;
 
     private int side = 0;
+    
+    private int speed = 50;
 
     private void eyeFollow(GraphicsContext gc) {
 
         switch (side) {
             case 0:
                 //Center to Top
-                circleY -= 10;
+                circleY -= speed;
                 if (circleY <= 40) {
                     circleY = 40;
                     side = 1;
@@ -80,7 +82,7 @@ public class ModeCalib extends AbstractMode {
                 break;
             case 1:
                 //Top Center to Top Right
-                circleX += 10;
+                circleX += speed;
                 if (circleX >= SCREEN_WIDTH - 40) {
                     circleX = SCREEN_WIDTH - 40;
                     side = 2;
@@ -88,7 +90,7 @@ public class ModeCalib extends AbstractMode {
                 break;
             case 2:
                 //Top Right to Bottom Right;
-                circleY += 10;
+                circleY += speed;
                 if (circleY >= SCREEN_HEIGHT - 40) {
                     circleY = SCREEN_HEIGHT - 40;
                     side = 3;
@@ -96,7 +98,7 @@ public class ModeCalib extends AbstractMode {
                 break;
             case 3:
                 //Bottom Right to Bottom Left;
-                circleX -= 10;
+                circleX -= speed;
                 if (circleX <= 40) {
                     circleX = 40;
                     side = 4;
@@ -104,7 +106,7 @@ public class ModeCalib extends AbstractMode {
                 break;
             case 4:
                 //Bottom Left to To Left;
-                circleY -= 10;
+                circleY -= speed;
                 if (circleY <= 40) {
                     circleY = 40;
                     side = 5;

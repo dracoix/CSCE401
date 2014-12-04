@@ -14,9 +14,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.Cursor;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import static mainapp.CoreEngine.CANVAS_SURFACE;
-import static mainapp.CoreEngine.MASTER_FRAME_TIME;
-import static mainapp.CoreEngine.SCENE_SURFACE;
+import static mainapp.CoreEngine.*;
 
 /**
  *
@@ -59,8 +57,11 @@ public class DriverEngine {
         CoreEngine.FUZZY_MOUSE.MidpointAndSet(CoreEngine.SCREEN_MOUSE);
         CoreEngine.tickFuzzyAdj();
         if (CurrentMode.running()) {
-            CurrentMode.tick(CANVAS_SURFACE);
+            CurrentMode.tick();
         } else {
+            CanvasReset(CANVAS_BACKGROUND_IMAGE);
+            CanvasReset(CANVAS_SURFACE);
+            CanvasReset(CANVAS_CURSOR);
             CurrentMode = CurrentMode.nextMode;
         }
 

@@ -9,7 +9,9 @@ import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.effect.BlendMode;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.FillRule;
 import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import static mainapp.BetterMath.rms;
@@ -26,14 +28,18 @@ public class CoreEngine {
 
     public static int MASTER_FRAME_TIME = 1000 / 30;
 
-    public static double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
-    public static double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
+    public static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
+    public static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
+
+    public static final double SCREEN_CENTER_X = SCREEN_WIDTH / 2;
+    public static final double SCREEN_CENTER_Y = SCREEN_HEIGHT / 2;
 
     public static final Group GROUP_ROOT = new Group();
 
     public static final Scene SCENE_SURFACE = new Scene(GROUP_ROOT, SCREEN_WIDTH, SCREEN_HEIGHT, Color.BLACK);
     public static final Canvas CANVAS_BACKGROUND_IMAGE = new Canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
     public static final Canvas CANVAS_SURFACE = new Canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
+    public static final Canvas CANVAS_CURSOR = new Canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
     public static final Canvas CANVAS_DEBUG = new Canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     public static double CALIB_MIN_X;
@@ -52,7 +58,9 @@ public class CoreEngine {
     public static void prepEngine() {
         GROUP_ROOT.getChildren().add(CANVAS_BACKGROUND_IMAGE);
         GROUP_ROOT.getChildren().add(CANVAS_SURFACE);
+        GROUP_ROOT.getChildren().add(CANVAS_CURSOR);
         GROUP_ROOT.getChildren().add(CANVAS_DEBUG);
+        GROUP_ROOT.setBlendMode(BlendMode.SCREEN);
     }
 
     public static double calcY() {
@@ -172,6 +180,29 @@ public class CoreEngine {
             }
         }
 
+    }
+
+    public static GraphicsContext getGC(Canvas c) {
+        return c.getGraphicsContext2D();
+    }
+
+    public static void CanvasWipe(Canvas c) {
+        c.getGraphicsContext2D().clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    }
+
+    public static void CanvasWipe(GraphicsContext gc) {
+        gc.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    }
+
+    public static void CanvasFade(Canvas c, double delta) {
+        c.getGraphicsContext2D().setFill(Color.BLACK.interpolate(Color.TRANSPARENT, delta));
+    }
+    
+    public static void CanvasReset(Canvas c)
+    {
+        CanvasWipe(c);
+        c.setBlendMode(null);
+        c.setEffect(null);
     }
 
 }
