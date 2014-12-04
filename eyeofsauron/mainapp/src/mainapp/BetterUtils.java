@@ -1,22 +1,18 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package mainapp;
 
-/**
- *
- * @author Expiscor
- */
 public class BetterUtils {
 
-    public static long time() {
+    public static final long time() {
         return System.currentTimeMillis();
     }
 
     public static final clsRandom Random = new clsRandom();
 
+    public static final double rand()
+    {
+        return Random.nextDouble();
+    }
+    
     public static final class clsRandom {
 
         private static long rnd() {
