@@ -3,7 +3,7 @@ package mainapp;
 public abstract class BetterObject {
 
     boolean garbage;
-    
+
     public boolean garbage() {
         return this.garbage;
     }
@@ -11,5 +11,5 @@ public abstract class BetterObject {
     public void destroy() {
         garbage = true;
     }
-    
+
 }

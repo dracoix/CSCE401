@@ -16,15 +16,6 @@ import static mainapp.CoreEngine.*;
 
 public class ModeCalib extends AbstractMode {
 
-    public ModeCalib(AbstractMode nextMode) {
-        super(nextMode);
-    }
-
-    @Override
-    public void init(Object[] args) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
     final String strTitle = "Get Ready To Follow The Circle!";
     String strCountDown = "";
 
@@ -35,9 +26,22 @@ public class ModeCalib extends AbstractMode {
 
     BoxBlur bb = new BoxBlur(4, 4, 2);
 
+    private double circleX = SCREEN_WIDTH / 2;
+    private double circleY = SCREEN_HEIGHT / 2;
+
+    private int side = 0;
+
+    private int speed = 20;
+
+    private int startCountFrom = 3;
+    private long currentTick = 0;
+
+    public ModeCalib(AbstractMode nextMode) {
+        super(nextMode);
+    }
+
     @Override
     public void tick() {
-
         if (ready) {
             getGC(CANVAS_SURFACE).setFill(Color.BLACK.interpolate(Color.TRANSPARENT, 0.5));
             getGC(CANVAS_SURFACE).fillRect(0, 0, CANVAS_SURFACE.getWidth(), CANVAS_SURFACE.getHeight());
@@ -62,15 +66,7 @@ public class ModeCalib extends AbstractMode {
         return c.getGraphicsContext2D();
     }
 
-    private double circleX = SCREEN_WIDTH / 2;
-    private double circleY = SCREEN_HEIGHT / 2;
-
-    private int side = 0;
-    
-    private int speed = 50;
-
     private void eyeFollow(GraphicsContext gc) {
-
         switch (side) {
             case 0:
                 //Center to Top
@@ -135,14 +131,9 @@ public class ModeCalib extends AbstractMode {
         getGC(CANVAS_DEBUG).fillRect(CALIB_ADJ_MIN_X, CALIB_ADJ_MIN_Y, (CALIB_ADJ_MAX_X - CALIB_ADJ_MIN_X), (CALIB_ADJ_MAX_Y - CALIB_ADJ_MIN_Y));
         getGC(CANVAS_DEBUG).setFill(Color.BLUE);
         getGC(CANVAS_DEBUG).fillOval(FUZZY_MOUSE.getX() - 2, FUZZY_MOUSE.getY() - 2, 4, 4);
-
     }
 
-    private int startCountFrom = 3;
-    private long currentTick = 0;
-
     private void runCountDown(GraphicsContext gc) {
-
         currentTick = startCountFrom - ((time() - countDown) / 1000);
         strCountDown = currentTick + "";
 

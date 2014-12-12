@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package mainapp;
 
 import java.util.logging.Level;
@@ -63,8 +58,8 @@ public class DriverEngine {
             CanvasReset(CANVAS_SURFACE);
             CanvasReset(CANVAS_CURSOR);
             CurrentMode = CurrentMode.nextMode;
+            CurrentMode.startMode();
         }
-
     }
 
     public void fire() {

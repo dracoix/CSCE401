@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package mainapp;
 
 import java.util.ArrayList;
@@ -24,6 +19,7 @@ import static mainapp.CoreEngine.FUZZY_ADJ_MOUSE;
 import static mainapp.CoreEngine.SCREEN_HEIGHT;
 import static mainapp.CoreEngine.SCREEN_WIDTH;
 import static mainapp.CoreEngine.getGC;
+import static mainapp.CoreEngine.FINAL_SCORE;
 
 public class ModeWhackamole extends AbstractMode {
 
@@ -43,7 +39,7 @@ public class ModeWhackamole extends AbstractMode {
     private int slotsX = 2;
     private int slotsY = 1;
     private int level = 1;
-    private int score;
+
     private int livesLeft = 5;
 
     boolean isGameOver;
@@ -60,6 +56,7 @@ public class ModeWhackamole extends AbstractMode {
     long pauseSnap = time();
     boolean allEmpty;
     SnapshotParameters cacheSP = new SnapshotParameters();
+    boolean hammerSnap;
 
     public ModeWhackamole(AbstractMode nextMode) {
         super(nextMode);
@@ -70,14 +67,15 @@ public class ModeWhackamole extends AbstractMode {
         fakeView.setImage(imgHammer);
 
         for (int i = 0; i < 9; i++) {
-            imgsMole[i] = new Image("Hole" + 7 + "x.png", 
-                    ((i + 1) / (double) 10) * SCREEN_WIDTH / 4, 
+            imgsMole[i] = new Image("Hole" + 7 + "x.png",
+                    ((i + 1) / (double) 10) * SCREEN_WIDTH / 4,
                     ((i + 1) / (double) 10) * SCREEN_WIDTH / 4, true, true);
         }
         for (int i = 9; i < 18; i++) {
             imgsMole[i] = new Image("Mole" + (i - 9) + "x.png", SCREEN_WIDTH / 4, SCREEN_HEIGHT / 4, true, true);
         }
         setupGame();
+        showAnnounce("LEVEL 1...", 5);
     }
 
     public void nextLevel() {
@@ -91,7 +89,7 @@ public class ModeWhackamole extends AbstractMode {
             slotsY = 3;
         }
 
-        showAnnounce("Level " + level, 5);
+        showAnnounce("LEVEL " + level, 5);
 
         setupGame();
 
@@ -112,13 +110,6 @@ public class ModeWhackamole extends AbstractMode {
         MAX_DELAY = (int) (5000 / Math.log1p(level));
     }
 
-    @Override
-    public void init(Object args[]) {
-        if (args != null) {
-
-        }
-    }
-
     public void setupGame() {
         SetDifficulty(level);
         double tmpY, hY;
@@ -133,6 +124,7 @@ public class ModeWhackamole extends AbstractMode {
                 slots.add(new Slot(tmpX, tmpY));
             }
         }
+
     }
 
     public void clearSlots() {
@@ -151,8 +143,9 @@ public class ModeWhackamole extends AbstractMode {
     }
 
     public void endGame() {
-        isGameOver = true;
+
         if (!isPaused()) {
+            
             this.endMode();
         }
     }
@@ -160,8 +153,14 @@ public class ModeWhackamole extends AbstractMode {
     @Override
     public void tick() {
 
-        if (!isPaused() || !isGameOver) {
+        if (isGameOver)
+        {
+            endGame();
+        }
+        if (!isPaused()) {
             updateObjects();
+        }else{
+            updateHammer();
         }
 
         renderBackground(CANVAS_BACKGROUND_IMAGE);
@@ -171,17 +170,16 @@ public class ModeWhackamole extends AbstractMode {
     }
 
     private void updateHammer() {
+        myHammer.tick();
         if (myHammer.isReadyToWhack()) {
-            myHammer.tick(true);
+            myHammer.startWhacking();
             if (myHammer.whackTarget()) {
-                score++;
-                if (score > (double) Math.pow(level, 2)) {
+                FINAL_SCORE++;
+                if (FINAL_SCORE > (double) Math.pow(level, 2)) {
                     nextLevel();
                     return;
                 }
             }
-        } else {
-            myHammer.tick(false);
         }
     }
 
@@ -190,27 +188,27 @@ public class ModeWhackamole extends AbstractMode {
         updateHammer();
 
         allEmpty = true;
+        hammerSnap = false;
         for (Slot s : slots) {
-            if (s.isPopped()) {
+            if (s.filled()) {
                 allEmpty = false;
-            }
-            if (FUZZY_ADJ_MOUSE.collides(s.position, senseRange)) {
-                fuzzyPosition.MidpointAndSet(s.position);
-                myHammer.setTarget(s.childMole);
-            }
-            s.tick();
-            if (s.hasDug()) {
-                if (livesLeft > 0) {
-                    livesLeft--;
-                } else {
-                    GameOver();
-                    return;
+                if (FUZZY_ADJ_MOUSE.collides(s.position, senseRange)) {
+                    fuzzyPosition.MidpointAndSet(s.position);
+                    myHammer.setTarget(s.childMole);
+                    hammerSnap = true;
                 }
             }
+
+            s.tick();
+
         }
 
-        if (allEmpty) {
+        if (!hammerSnap) {
             fuzzyPosition.MidpointAndSet(FUZZY_ADJ_MOUSE);
+        }
+
+        if (livesLeft == 0) {
+            GameOver();
         }
 
     }
@@ -222,7 +220,7 @@ public class ModeWhackamole extends AbstractMode {
         if (m.garbage()) {
             return;
         }
-        m.tick(true);
+        m.tick();
     }
 
     private void renderDepthField(GraphicsContext gc) {
@@ -254,16 +252,13 @@ public class ModeWhackamole extends AbstractMode {
 
     private void renderMoles(GraphicsContext gc) {
         for (Slot s : slots) {
-            if (s.filled) {
-                if (s.childMole == null) {
-                    continue;
-                }
-                gc.drawImage(s.childMole.curFrame, s.position.getX()
-                        - s.slotWidth * s.childMole.curFrame.getWidth() / 2,
+            if (s.filled()) {
+                gc.drawImage(s.childMole.getCurrentFrame(), s.position.getX()
+                        - s.slotWidth * s.childMole.centerW(),
                         s.position.getY()
-                        - s.slotWidth * s.childMole.curFrame.getHeight() / 2,
-                        s.slotWidth * s.childMole.curFrame.getWidth(),
-                        s.slotWidth * s.childMole.curFrame.getHeight());
+                        - s.slotWidth * s.childMole.centerH(),
+                        s.slotWidth * s.childMole.width(),
+                        s.slotWidth * s.childMole.height());
                 //gc.setFill((s.isWhacked()) ? Color.BLACK : (s.hasDug()) ? Color.RED : Color.ORANGE);
                 //gc.fillOval(s.position.getX() - 20, s.position.getY() - 20, 40, 40);
             }
@@ -284,7 +279,6 @@ public class ModeWhackamole extends AbstractMode {
     private void renderHammer(GraphicsContext gc) {
         fakeView.setFitHeight(calcWidthAtY(fuzzyPosition.getY()) / 4);
         fakeView.setFitWidth(calcWidthAtY(fuzzyPosition.getY()) / 4);
-        //fakeView.setImage(imgHammer);
         fakeView.setRotate(Math.abs(60 - myHammer.angle));
         fakeView.setSmooth(true);
         renderedHammer = new WritableImage(900, 900);
@@ -299,7 +293,7 @@ public class ModeWhackamole extends AbstractMode {
     private void renderGameText(GraphicsContext gc) {
         gc.setFont(CoreEngine.fntImpact24);
         gc.setFill(Color.WHITE);
-        gc.fillText("SCORE: " + score, 4, 32);
+        gc.fillText("SCORE: " + FINAL_SCORE, 4, 32);
         gc.fillText("LEVEL: " + level, 4, 64);
         gc.fillText("HAMMERS LEFT: " + livesLeft, SCREEN_WIDTH - 256, 32);
     }
@@ -307,7 +301,8 @@ public class ModeWhackamole extends AbstractMode {
     private void GameOver() {
         pauseSnap = time() + 5000;
         fadeAnnounce = 1;
-        strAnnounce = "GAME OVER";
+        strAnnounce = "GAME OVER \nSCORE: " + FINAL_SCORE;
+        isGameOver = true;
         endGame();
     }
 
@@ -347,12 +342,8 @@ public class ModeWhackamole extends AbstractMode {
 
     class Slot extends BetterObject {
 
-        boolean filled;
         BetterPoint2D position = new BetterPoint2D();
         double slotWidth;
-
-        Image curFrame;
-
         Mole childMole;
 
         public Slot(double x, double y) {
@@ -360,12 +351,24 @@ public class ModeWhackamole extends AbstractMode {
             slotWidth = (0.5 + (y / (2 * SCREEN_HEIGHT)));
         }
 
+        public boolean filled() {
+            if (childMole == null) {
+                return false;
+            } else {
+                if (childMole.garbage()) {
+                    childMole = null;
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public void tryCreateMole() {
-            if (this.filled) {
+            if (filled()) {
                 return;
             }
             childMole = new Mole(position);
-            this.filled = true;
+
         }
 
         @Override
@@ -382,48 +385,21 @@ public class ModeWhackamole extends AbstractMode {
                 tryCreateMole();
             }
 
-            if (childMole == null) {
-                this.filled = false;
-            } else {
-                if (childMole.garbage()) {
-                    childMole = null;
-                    curFrame = null;
-                } else {
-
-                    updateMole(childMole);
-                    curFrame = childMole.getCurrentFrame();
-                }
-            }
-        }
-
-        private boolean isPopped() {
-            if (childMole == null) {
-                return false;
-            }
-            if (childMole.whacked) {
-                return false;
-            }
-            return this.filled;
-        }
-
-        private boolean isWhacked() {
-            if (this.childMole != null) {
-                this.curFrame = imgsMole[9];
-                return this.childMole.whacked;
-            }
-            return false;
+            if (filled()) {
+                updateMole(childMole);
+            };
 
         }
 
         private boolean hasDug() {
-            if (this.childMole != null) {
+            if (filled()) {
                 return this.childMole.hide;
             }
             return false;
         }
     }
 
-    class Hammer extends AnimatedObject {
+    class Hammer extends RenderObject {
 
         Mole target;
         long hoverTimeRequired = 5;
@@ -431,18 +407,12 @@ public class ModeWhackamole extends AbstractMode {
         double angle = 0;
         boolean isWhacking;
 
-        BetterPoint2D position = new BetterPoint2D();
-
         public Hammer() {
-            this.curFrame = imgHammer;
+            this.setCurrentFrame(imgHammer);
         }
 
         public void setHoverTimeRequired(long ms) {
             this.hoverTimeRequired = ms;
-        }
-
-        public BetterPoint2D getPosition() {
-            return this.position;
         }
 
         public void setTarget(Mole m) {
@@ -457,23 +427,21 @@ public class ModeWhackamole extends AbstractMode {
             }
         }
 
-        @Override
-        public void tick(boolean proceed) {
-            super.tick(proceed);
-            isWhacking(proceed);
-
+        public void startWhacking() {
+            isWhacking = true;
         }
 
-        void isWhacking(boolean proceed) {
-            if (proceed & angle == 0) {
-                isWhacking = true;
-            }
+        @Override
+        public void tick() {
+            super.tick();
+            isWhacking();
+        }
 
+        void isWhacking() {
             if (isWhacking) {
                 angle *= 1.5;
                 angle += 1;
             }
-
             if (angle >= 150) {
                 angle = 0;
                 isWhacking = false;
@@ -502,7 +470,7 @@ public class ModeWhackamole extends AbstractMode {
 
     }
 
-    class Mole extends AnimatedObject {
+    class Mole extends RenderObject {
 
         boolean whacked;
         boolean hide;
@@ -510,21 +478,9 @@ public class ModeWhackamole extends AbstractMode {
         long timeUntilHide;
         long timeUntilDeath = Long.MAX_VALUE;
 
-        BetterPoint2D position;
-        BetterPoint2D renderPosition = new BetterPoint2D();
-
         public Mole(BetterPoint2D sync) {
-            this.position = sync;
+            this.syncPosition(sync);
             timeUntilHide = (long) (time() + MAX_DELAY + (BetterUtils.Random.nextDouble() * MAX_DELAY));
-        }
-
-        public BetterPoint2D getRenderPosition() {
-            renderPosition.set(this.position.getX() - this.curFrame.getWidth() / 2, this.position.getY() - this.curFrame.getHeight() / 2);
-            return renderPosition;
-        }
-
-        public BetterPoint2D getPosition() {
-            return this.position;
         }
 
         public void whackMe() {
@@ -532,11 +488,12 @@ public class ModeWhackamole extends AbstractMode {
             hide = false;
             timeUntilHide = Long.MAX_VALUE;
             timeUntilDeath = time() + 1000;
-            tick(true);
+            this.setCurrentFrame(imgsMole[9]);
+            tick();
         }
 
         @Override
-        public void tick(boolean nextAnimation) {
+        public void tick() {
             if (time() > timeUntilDeath) {
                 this.destroy();
                 return;
@@ -544,24 +501,23 @@ public class ModeWhackamole extends AbstractMode {
 
             if (time() > timeUntilHide) {
                 this.hide = true;
+                if (livesLeft > 0) {
+                    livesLeft--;
+                }
+
                 this.destroy();
                 return;
             }
 
-            if (!this.whacked){
-            curFrame = imgsMole[(int) Math.abs(
-                    Math.sin(Math.PI * (timeUntilHide - time()) / (timeUntilHide - timeInit)) * 17)];
-            }else
-            {
-                curFrame = imgsMole[9];
+            if (!this.whacked) {
+                this.setCurrentFrame(
+                        imgsMole[(int) Math.abs(
+                                Math.sin(Math.PI * (timeUntilHide - time()) / (timeUntilHide - timeInit)) * 17)]
+                );
+            } else {
+                this.setCurrentFrame(imgsMole[9]);
             }
 
-        }
-
-        @Override
-        public void destroy() {
-            super.destroy();
-            this.renderPosition = null;
         }
 
     }

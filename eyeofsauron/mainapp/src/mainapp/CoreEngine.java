@@ -5,6 +5,16 @@
  */
 package mainapp;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -55,6 +65,54 @@ public class CoreEngine {
     public static final Font fntImpact20 = Font.font("Impact", 20);
     public static final Font fntImpact18 = Font.font("Impact", 18);
 
+    public static int FINAL_SCORE;
+    public static ArrayList<ScoreEntry> SCORES = new ArrayList<>();
+
+    public static void SAVE_SCORES() {
+        FileOutputStream fos = null;
+        ObjectOutputStream oos = null;
+        try {
+            File f = new File("scores.dat");
+            fos = new FileOutputStream(f, false);
+            oos = new ObjectOutputStream(fos);
+            oos.writeObject(SCORES);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(CoreEngine.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(CoreEngine.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                fos.close();
+            } catch (IOException ex) {
+                Logger.getLogger(CoreEngine.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+    }
+    public static void LOAD_SCORES() {
+        FileInputStream fis = null;
+        ObjectInputStream ois = null;
+        try {
+            File f = new File("scores.dat");
+            if (!f.exists()) SAVE_SCORES();
+            fis = new FileInputStream(f);
+            ois = new ObjectInputStream(fis);
+            SCORES = (ArrayList<ScoreEntry>) ois.readObject();
+        } catch (IOException | ClassNotFoundException ex) {
+            SCORES = new ArrayList<>();
+            Logger.getLogger(CoreEngine.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            try {
+                fis.close();
+            } catch (IOException ex) {
+                Logger.getLogger(CoreEngine.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+    }
+
+    
+    
     public static void prepEngine() {
         GROUP_ROOT.getChildren().add(CANVAS_BACKGROUND_IMAGE);
         GROUP_ROOT.getChildren().add(CANVAS_SURFACE);
@@ -197,12 +255,113 @@ public class CoreEngine {
     public static void CanvasFade(Canvas c, double delta) {
         c.getGraphicsContext2D().setFill(Color.BLACK.interpolate(Color.TRANSPARENT, delta));
     }
-    
-    public static void CanvasReset(Canvas c)
-    {
+
+    public static void CanvasReset(Canvas c) {
         CanvasWipe(c);
         c.setBlendMode(null);
         c.setEffect(null);
+    }
+
+    static class miniCalib {
+
+        public static double maxX;
+        public static double maxY;
+        public static double minX;
+        public static double minY;
+        public static double cX;
+        public static double cY;
+        public static double fX;
+        public static double fY;
+
+        static void runMiniCalib() {
+            if (SCREEN_MOUSE.getX() > maxX) {
+                maxX += SCREEN_MOUSE.getX();
+                maxX /= 2;
+            }
+            if (SCREEN_MOUSE.getX() < minX) {
+                minX += SCREEN_MOUSE.getX();
+                minX /= 2;
+            }
+
+            if (SCREEN_MOUSE.getY() > maxY) {
+                maxY += SCREEN_MOUSE.getY();
+                maxY /= 2;
+            }
+            if (SCREEN_MOUSE.getY() < minY) {
+                minY += SCREEN_MOUSE.getY();
+                minY /= 2;
+            }
+
+            cX = (minX + maxX) / 2;
+            cY = (minY + maxY) / 2;
+
+            if ((maxX - minX) > 0.5) {
+                fX *= 2;
+                fX += (1 - (((maxX - SCREEN_MOUSE.getX())) / (maxX - minX))) * SCREEN_WIDTH;
+                fX /= 3;
+            }
+
+            if ((maxY - minY) > 0.5) {
+                fY *= 2;
+                fY += (1 - (((maxY - SCREEN_MOUSE.getY())) / (maxY - minY))) * SCREEN_HEIGHT;
+                fY /= 3;
+            }
+
+            if (fX > (SCREEN_WIDTH * 5 / 6)) {
+                //fX *=1;
+                fX = (SCREEN_WIDTH * 5 / 6);
+                //fX /= 2;
+            }
+
+            if (fX < (SCREEN_WIDTH * 1 / 6)) {
+                //fX *=1;
+                fX = (SCREEN_WIDTH * 1 / 6);
+                //fX /= 2;
+            }
+
+            if (fY > (SCREEN_HEIGHT * 5 / 6)) {
+                //fY *=1;
+                fY = (SCREEN_HEIGHT * 5 / 6);
+                //fY /= 2;
+            }
+
+            if (fY < (SCREEN_HEIGHT * 1 / 6)) {
+                //fY *=1;
+                fY = (SCREEN_HEIGHT * 1 / 6);
+                //fY /= 2;
+            }
+
+        }
+
+        static void resetMiniCalib() {
+            //maxX = 0;
+            //minX = SCREEN_WIDTH;
+
+            maxX--;
+            minX++;
+
+            //maxY = 0;
+            //minY = SCREEN_HEIGHT;
+            maxY--;
+            minY++;
+
+            if (minY > maxY) {
+                maxY += 1;
+                minY -= 1;
+            }
+
+            if (minX > maxX) {
+                maxX += 1;
+                minX -= 1;
+            }
+
+            cX = (minX + maxX) / 2;
+            cY = (minY + maxY) / 2;
+
+            runMiniCalib();
+
+        }
+
     }
 
 }

@@ -8,12 +8,14 @@ public class BetterUtils {
 
     public static final clsRandom Random = new clsRandom();
 
-    public static final double rand()
-    {
+    public static final double rand() {
         return Random.nextDouble();
     }
-    
+
     public static final class clsRandom {
+        // Light-Weight Randomizer from Clover Jacket
+        // Uses M.G. 2003 XORShift Method
+        // Uses R.D. 2014 Clover salt Method
 
         private static long rnd() {
             return mg2003(proc() ^ mg2003(proc()));
