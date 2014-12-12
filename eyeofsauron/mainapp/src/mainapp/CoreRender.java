@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package mainapp;
 
 import com.sun.javafx.tk.Toolkit;
@@ -13,12 +8,10 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
-/**
- *
- * @author Expiscor
- */
 public class CoreRender {
-
+    
+    // GLOBAL JavaFX Objects and Render Helpers
+    
     public static final int MASTER_FRAMES_PER_SECOND = 30;
     public static final int MASTER_FRAME_TIME = 1000 / MASTER_FRAMES_PER_SECOND;
 

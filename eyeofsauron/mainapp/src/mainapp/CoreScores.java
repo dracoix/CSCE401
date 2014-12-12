@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 
 public class CoreScores {
 
-    private static int FINAL_SCORE;
+    private static int CURRENT_SCORE;
     private static ArrayList<ScoreEntry> SCORES = new ArrayList<>();
 
     private static void SAVE_SCORES() {
@@ -71,7 +71,7 @@ public class CoreScores {
     
     public static int getCurrentScore()
     {
-        return FINAL_SCORE;
+        return CURRENT_SCORE;
     }
     
     public static int count()
@@ -87,18 +87,18 @@ public class CoreScores {
     
     public static void modifyScoreBy(int amount)
     {
-        FINAL_SCORE += amount;
+        CURRENT_SCORE += amount;
     }
     public static void addNewScoreEntry(String name) {
-        SCORES.add(new ScoreEntry(name, FINAL_SCORE));
-        FINAL_SCORE = 0;
+        SCORES.add(new ScoreEntry(name, CURRENT_SCORE));
+        CURRENT_SCORE = 0;
         Collections.sort(SCORES);
         SAVE_SCORES();
     }
 
     private static class ScoreEntry implements Comparable<ScoreEntry>, Serializable {
 
-        // From Homework
+        // Modified from score homework assignment
         private final String name;
         private final int score;
 

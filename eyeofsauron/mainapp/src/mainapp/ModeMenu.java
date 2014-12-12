@@ -75,21 +75,8 @@ public class ModeMenu extends AbstractMode {
 
     @Override
     public void tick() {
-        //c.setEffect(null);
-
-        resetMiniCalib();
-        miniCalc.calc();
-        buttonCheck();
-
-        CanvasWipe(CANVAS_SURFACE);
-
-        renderObjects(CANVAS_SURFACE.getGraphicsContext2D());
-
-        CanvasWipe(CANVAS_CURSOR);
-        CANVAS_CURSOR.setOpacity(1);
-        CANVAS_CURSOR.setEffect(bbCursor);
-        CANVAS_CURSOR.setBlendMode(BlendMode.HARD_LIGHT);
-        renderCursor(CANVAS_CURSOR, CANVAS_CURSOR.getGraphicsContext2D());
+        updateObjects();
+        renderObjects();
     }
 
     void buttonCheck() {
@@ -120,18 +107,24 @@ public class ModeMenu extends AbstractMode {
 
     }
 
-    public void renderObjects(GraphicsContext gc) {
+    public void renderObjects() {
 
         getGC(CANVAS_BACKGROUND).drawImage(menuBackground, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         getGC(CANVAS_BACKGROUND).drawImage(menuTower, SCREEN_WIDTH / 2 - gfxTowerWidth / 2, SCREEN_HEIGHT / 2 - 60, gfxTowerWidth, gfxTowerHeight);
         getGC(CANVAS_BACKGROUND).drawImage(menuEye, SCREEN_WIDTH / 2 - gfxEyeWidth / 2, SCREEN_HEIGHT / 2 - 60, gfxEyeWidth, gfxEyeHeight);
 
         // render 4 cells;
-        renderText(gc);
+        CanvasWipe(CANVAS_SURFACE);
+        renderText(getGC(CANVAS_SURFACE));
+        
+        renderCursorCanvas(CANVAS_CURSOR);
 
     }
 
     public void updateObjects() {
+        resetMiniCalib();
+        miniCalc.calc();
+        buttonCheck();
     }
 
     private void renderText(GraphicsContext gc) {
@@ -226,7 +219,16 @@ public class ModeMenu extends AbstractMode {
 
     }
 
-    private void renderCursor(Canvas c, GraphicsContext gc) {
+    private void renderCursorCanvas(Canvas c) {
+        CanvasWipe(c);
+        c.setOpacity(1);
+        c.setEffect(bbCursor);
+        c.setBlendMode(BlendMode.HARD_LIGHT);
+        renderCursor(getGC(c));
+    }
+
+    private void renderCursor(GraphicsContext gc) {
+
         gc.save();
         gc.setGlobalAlpha(0.1);
         gc.setFill(Color.YELLOW);

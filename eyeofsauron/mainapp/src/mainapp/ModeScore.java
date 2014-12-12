@@ -65,9 +65,7 @@ public class ModeScore extends AbstractMode {
     }
 
     void endTick() {
-        if (timeToEnd > time()) {
-            return;
-        } else {
+        if (timeToEnd < time()) {
             save();
             this.endMode();
         }

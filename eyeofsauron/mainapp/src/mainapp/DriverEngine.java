@@ -11,27 +11,29 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 public class DriverEngine {
-
+   
+    // This bridges the renderable features to the game loop
+    
     private Timeline MAINLOOP;
     AbstractMode CurrentMode = new ModeMenu(null);
 
     public DriverEngine() {
-
         CoreEngine.prepEngine();
     }
 
     void init(Stage primaryStage) {
-
         Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
         CoreRender.SCENE_SURFACE.setCursor(Cursor.NONE);
         primaryStage.setScene(CoreRender.SCENE_SURFACE);
 
         try {
+            // JavaFX hard fix for invocation (it's dumb)
             Thread.sleep(1000);
         } catch (InterruptedException ex) {
             Logger.getLogger(DriverEngine.class.getName()).log(Level.SEVERE, null, ex);
         }
 
+        //Add game loop as animation object
         final KeyFrame oneFrame;
         oneFrame = new KeyFrame(Duration.millis(CoreRender.MASTER_FRAME_TIME), (ActionEvent event) -> {
             tick();
@@ -42,12 +44,12 @@ public class DriverEngine {
         MAINLOOP.getKeyFrames().add(oneFrame);
     }
 
-    public void tick() {
-
+    private void tick() {
+        // THE BRIDGE TO THE MODES
         CoreEngine.FUZZY_MOUSE.MidpointAndSet(CoreEngine.SCREEN_MOUSE);
         CoreEngine.tickFuzzyAdj();
         if (CurrentMode.running()) {
-            CurrentMode.tick();
+            CurrentMode.tick();     // Magic
         } else {
             CoreRender.FullReset();
             CurrentMode = CurrentMode.nextMode;
@@ -56,9 +58,7 @@ public class DriverEngine {
     }
 
     public void fire() {
-
         CurrentMode.startMode();
-
         MAINLOOP.play();
         System.out.println("Fired...");
     }

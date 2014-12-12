@@ -5,6 +5,8 @@ import static mainapp.BetterMath.sqrt2;
 
 public class BetterPoint2D {
 
+    //JavaFX is notriously horrible when using its own geometry objects
+    
     private double x;
     private double y;
 

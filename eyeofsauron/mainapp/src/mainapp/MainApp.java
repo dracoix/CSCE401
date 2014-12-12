@@ -19,8 +19,11 @@ import javafx.stage.StageStyle;
  */
 public class MainApp extends Application {
 
+    // This bridges operating system events to the engine driver
+    
     @Override
     public void start(Stage primaryStage) {
+        
         DriverEngine ENGINE = new DriverEngine();
         primaryStage.initStyle(StageStyle.UNDECORATED);
 

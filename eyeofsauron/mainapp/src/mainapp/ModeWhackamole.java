@@ -18,7 +18,6 @@ import static mainapp.CoreRender.CANVAS_BACKGROUND;
 import static mainapp.CoreRender.CANVAS_CURSOR;
 import static mainapp.CoreRender.CANVAS_SURFACE;
 import static mainapp.CoreRender.CanvasWipe;
-import static mainapp.CoreRender.fntImpact24;
 import static mainapp.CoreRender.fntImpact32;
 import static mainapp.CoreRender.fntImpact48;
 import static mainapp.CoreRender.getFontWidth;
@@ -26,37 +25,46 @@ import static mainapp.CoreRender.getGC;
 
 public class ModeWhackamole extends AbstractMode {
 
-    private final ArrayList<BetterPoint2D> molePositions = new ArrayList<>();
+    //Moles in slots
     private final ArrayList<Slot> slots = new ArrayList<>();
+    
+    // Hammer's fuzzy smooth positioning
     public final BetterPoint2D fuzzyPosition = new BetterPoint2D();
     private final Hammer myHammer = new Hammer(fuzzyPosition);
 
-    final ImageView fakeView = new ImageView();
+    final ImageView fakeView = new ImageView();     //Used for hammer rotation
     final Image imgHammer = new Image("Mallet.png");
     final Image imgBackground = new Image("BG_Lava.png", SCREEN_WIDTH, SCREEN_HEIGHT, false, true);
     WritableImage renderedHammer = new WritableImage(560, 560);
-    final Image[] imgsHole = new Image[9];
+    
+    //Mole animation speghetti
     final Image[] imgsMole = new Image[18];
 
+    //Slot layout count
     private int slotsX = 2;
     private int slotsY = 1;
+    
     private int level = 1;
-
     private int livesLeft = 5;
-
     boolean isGameOver;
 
+    //SENSORY SNAP RANGE
     private final double senseRange = rms(SCREEN_HEIGHT, SCREEN_WIDTH) / 8;
 
-    long MAX_DELAY = 1000;
-    int MAX_MOLES = 1;
+    //Delay until moles will hide
+    long MAX_DELAY;
 
+    //Announce fading and display
     double fadeAnnounce;
     String strAnnounce = "";
 
+    //When to unpause
     long pauseSnap = time();
 
+    //Hammer's rotation speghetti
     SnapshotParameters cacheSP = new SnapshotParameters();
+    
+    //Hammer is locked to slot
     boolean hammerIsAligned;
 
     public ModeWhackamole(AbstractMode nextMode) {
@@ -115,7 +123,6 @@ public class ModeWhackamole extends AbstractMode {
     }
 
     public void SetDifficulty(int level) {
-        MAX_MOLES = level;
         MAX_DELAY = (int) (5000 / Math.log1p(level));
     }
 
@@ -179,6 +186,7 @@ public class ModeWhackamole extends AbstractMode {
     }
 
     public void endGame() {
+        //End the mode when pause is done
         if (!isPaused()) {
             this.endMode();
         }

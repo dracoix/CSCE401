@@ -5,6 +5,8 @@ import javafx.scene.image.Image;
 
 public class RenderObject extends BetterObject {
 
+    //Abstraction is partially used.
+    
     Image currentFrame;
     BetterPoint2D position;
     BetterPoint2D renderPosition = new BetterPoint2D();

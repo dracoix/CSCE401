@@ -60,10 +60,6 @@ public class ModeCalib extends AbstractMode {
         }
     }
 
-    private GraphicsContext getGC(Canvas c) {
-        return c.getGraphicsContext2D();
-    }
-
     private void eyeFollow(GraphicsContext gc) {
         switch (side) {
             case 0:
