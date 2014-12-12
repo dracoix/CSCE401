@@ -5,21 +5,24 @@
  */
 package mainapp;
 
-import com.sun.scenario.effect.Effect;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.BoxBlur;
 import javafx.scene.paint.Color;
 import static mainapp.BetterUtils.time;
-import static mainapp.CoreEngine.SCREEN_WIDTH;
 import static mainapp.CoreEngine.*;
+import static mainapp.CoreRender.*;
 
 public class ModeCalib extends AbstractMode {
 
-    final String strTitle = "Get Ready To Follow The Circle!";
+    final String strTitle = "Calibration: Get Ready To Follow The Circle!";
     String strCountDown = "";
 
-    private long countDown = time();
+    private final long beginTime = time();
+    private final int speed = 20;
+    private final int startCountFrom = 3;
+
+    private long currentTick = 0;
 
     boolean ready;
     boolean done;
@@ -30,11 +33,6 @@ public class ModeCalib extends AbstractMode {
     private double circleY = SCREEN_HEIGHT / 2;
 
     private int side = 0;
-
-    private int speed = 20;
-
-    private int startCountFrom = 3;
-    private long currentTick = 0;
 
     public ModeCalib(AbstractMode nextMode) {
         super(nextMode);
@@ -134,7 +132,7 @@ public class ModeCalib extends AbstractMode {
     }
 
     private void runCountDown(GraphicsContext gc) {
-        currentTick = startCountFrom - ((time() - countDown) / 1000);
+        currentTick = startCountFrom - ((time() - beginTime) / 1000);
         strCountDown = currentTick + "";
 
         if (currentTick < 0) {
@@ -150,9 +148,4 @@ public class ModeCalib extends AbstractMode {
         gc.fillText(strTitle, SCREEN_WIDTH / 2 - getFontWidth(gc, strTitle) / 2, SCREEN_HEIGHT / 2);
         gc.fillText(strCountDown, SCREEN_WIDTH / 2 - getFontWidth(gc, strCountDown) / 2, SCREEN_HEIGHT / 2 + getFontHeight(gc));
     }
-
-    private void updateObjects() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
 }

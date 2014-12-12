@@ -1,8 +1,6 @@
 package mainapp;
 
 import static mainapp.BetterMath.hyp;
-import static mainapp.BetterMath.hyp2;
-import static mainapp.BetterMath.sqr;
 import static mainapp.BetterMath.sqrt2;
 
 public class BetterPoint2D {

@@ -9,12 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.scene.Cursor;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import static mainapp.CoreEngine.*;
 
-/**
- *
- * @author David 'dracoix' Rathbun
- */
 public class DriverEngine {
 
     private Timeline MAINLOOP;
@@ -28,8 +23,8 @@ public class DriverEngine {
     void init(Stage primaryStage) {
 
         Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
-        SCENE_SURFACE.setCursor(Cursor.NONE);
-        primaryStage.setScene(SCENE_SURFACE);
+        CoreRender.SCENE_SURFACE.setCursor(Cursor.NONE);
+        primaryStage.setScene(CoreRender.SCENE_SURFACE);
 
         try {
             Thread.sleep(1000);
@@ -38,7 +33,7 @@ public class DriverEngine {
         }
 
         final KeyFrame oneFrame;
-        oneFrame = new KeyFrame(Duration.millis(MASTER_FRAME_TIME), (ActionEvent event) -> {
+        oneFrame = new KeyFrame(Duration.millis(CoreRender.MASTER_FRAME_TIME), (ActionEvent event) -> {
             tick();
         });
 
@@ -54,9 +49,7 @@ public class DriverEngine {
         if (CurrentMode.running()) {
             CurrentMode.tick();
         } else {
-            CanvasReset(CANVAS_BACKGROUND_IMAGE);
-            CanvasReset(CANVAS_SURFACE);
-            CanvasReset(CANVAS_CURSOR);
+            CoreRender.FullReset();
             CurrentMode = CurrentMode.nextMode;
             CurrentMode.startMode();
         }

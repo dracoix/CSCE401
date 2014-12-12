@@ -5,25 +5,28 @@
  */
 package mainapp;
 
-import java.awt.image.BufferedImage;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.BlendMode;
 import javafx.scene.effect.BoxBlur;
 import javafx.scene.effect.Glow;
 import javafx.scene.image.Image;
-import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import static mainapp.BetterUtils.time;
 import static mainapp.CoreEngine.*;
 import static mainapp.CoreEngine.miniCalib.fX;
 import static mainapp.CoreEngine.miniCalib.fY;
 import static mainapp.CoreEngine.miniCalib.resetMiniCalib;
+import static mainapp.CoreRender.CANVAS_BACKGROUND;
+import static mainapp.CoreRender.CANVAS_CURSOR;
+import static mainapp.CoreRender.CANVAS_SURFACE;
+import static mainapp.CoreRender.CanvasWipe;
+import static mainapp.CoreRender.fntImpact20;
+import static mainapp.CoreRender.fntImpact48;
+import static mainapp.CoreRender.getFontHeight;
+import static mainapp.CoreRender.getFontWidth;
+import static mainapp.CoreRender.getGC;
 
-/**
- *
- * @author Expiscor
- */
 public class ModeMenu extends AbstractMode {
 
     static final double gfxTowerWidth = 200;
@@ -45,9 +48,6 @@ public class ModeMenu extends AbstractMode {
     final double cellWidth = CoreEngine.SCREEN_WIDTH / 3;
     final double cellHeight = CoreEngine.SCREEN_HEIGHT / 3;
 
-    long cellPush[] = new long[4];
-    boolean nextModeReady;
-
     final Image menuBackground = new Image("BACKGROUND.png", SCREEN_WIDTH, SCREEN_HEIGHT, true, true);
     final Image menuTower = new Image("TOWER.png", gfxTowerWidth, gfxTowerHeight, true, true);
     final Image menuEye = new Image("EmptyEye.png", gfxEyeWidth, gfxEyeHeight, true, true);
@@ -57,20 +57,20 @@ public class ModeMenu extends AbstractMode {
     boolean[] cellHover = new boolean[4];
     int cellHoverIndex;
 
-    private double lastDeltaX;
-    private double lastDeltaY;
+    long cellPush[] = new long[4];
+    boolean nextModeReady;
 
     Glow gText = new Glow(1);
+    BoxBlur bbCursor = new BoxBlur(10, 10, 2);
 
     double fntHeight;
-
-    BoxBlur bbCursor = new BoxBlur(10, 10, 2);
+    final String helpText = "Move your eyes to control selection."
+            + "\n CALIBRATE BEFORE EACH GAME FOR BEST RESULTS!";
 
     public ModeMenu(AbstractMode nextMode) {
         super(nextMode);
         miniCalc.init();
-        LOAD_SCORES();
-
+        CoreScores.init();
     }
 
     @Override
@@ -78,24 +78,18 @@ public class ModeMenu extends AbstractMode {
         //c.setEffect(null);
 
         resetMiniCalib();
+        miniCalc.calc();
         buttonCheck();
 
         CanvasWipe(CANVAS_SURFACE);
 
         renderObjects(CANVAS_SURFACE.getGraphicsContext2D());
 
-        //CANVAS_CURSOR.setBlendMode(null);
-        //CanvasFade(CANVAS_CURSOR,0.9);
         CanvasWipe(CANVAS_CURSOR);
         CANVAS_CURSOR.setOpacity(1);
-        //CANVAS_CURSOR.getGraphicsContext2D().clearRect(1, 1, 500,500);
-        //CANVAS_CURSOR.getGraphicsContext2D().setFill(Color.BLACK);
-        //CANVAS_CURSOR.getGraphicsContext2D().fillRect(0, 0, CANVAS_CURSOR.getWidth(), CANVAS_CURSOR.getHeight());
-        //CANVAS_CURSOR.getGraphicsContext2D().clearRect(0, 0, CANVAS_CURSOR.getWidth(), CANVAS_CURSOR.getHeight());
-        //CoreEngine.CanvasFade(CoreEngine.CANVAS_CURSOR, 0.9);
         CANVAS_CURSOR.setEffect(bbCursor);
         CANVAS_CURSOR.setBlendMode(BlendMode.HARD_LIGHT);
-        renderCursor(CoreEngine.CANVAS_CURSOR, CoreEngine.CANVAS_CURSOR.getGraphicsContext2D());
+        renderCursor(CANVAS_CURSOR, CANVAS_CURSOR.getGraphicsContext2D());
     }
 
     void buttonCheck() {
@@ -128,9 +122,9 @@ public class ModeMenu extends AbstractMode {
 
     public void renderObjects(GraphicsContext gc) {
 
-        getGC(CANVAS_BACKGROUND_IMAGE).drawImage(menuBackground, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-        getGC(CANVAS_BACKGROUND_IMAGE).drawImage(menuTower, SCREEN_WIDTH / 2 - gfxTowerWidth / 2, SCREEN_HEIGHT / 2 - 60, gfxTowerWidth, gfxTowerHeight);
-        getGC(CANVAS_BACKGROUND_IMAGE).drawImage(menuEye, SCREEN_WIDTH / 2 - gfxEyeWidth / 2, SCREEN_HEIGHT / 2 - 60, gfxEyeWidth, gfxEyeHeight);
+        getGC(CANVAS_BACKGROUND).drawImage(menuBackground, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        getGC(CANVAS_BACKGROUND).drawImage(menuTower, SCREEN_WIDTH / 2 - gfxTowerWidth / 2, SCREEN_HEIGHT / 2 - 60, gfxTowerWidth, gfxTowerHeight);
+        getGC(CANVAS_BACKGROUND).drawImage(menuEye, SCREEN_WIDTH / 2 - gfxEyeWidth / 2, SCREEN_HEIGHT / 2 - 60, gfxEyeWidth, gfxEyeHeight);
 
         // render 4 cells;
         renderText(gc);
@@ -193,7 +187,7 @@ public class ModeMenu extends AbstractMode {
         gc.save();
         renderHelp(gc);
         gc.restore();
-        
+
         //BOTTOM RIGHT
         renderScores(gc);
     }
@@ -207,20 +201,17 @@ public class ModeMenu extends AbstractMode {
             gc.setFill(Color.WHITE);
         }
         gc.setFont(fntImpact20);
-        for (int i = 0; i < SCORES.size(); i++) {
+        for (int i = 0; i < CoreScores.count(); i++) {
             if (i > 9) {
                 continue;
             }
-            gc.fillText(SCORES.get(i).toString(),
+            gc.fillText(CoreScores.getPrinted(i),
                     cellWidth * 2 + cellWidth / 4,
                     cellHeight * 3 / 2 + fntHeight + 32
                     + 20 * i);
 
         }
     }
-
-    final String helpText = "Move your eyes to control selection."
-            + "\n CALIBRATE BEFORE EACH GAME FOR BEST RESULTS!";
 
     private void renderHelp(GraphicsContext gc) {
         if (cellHoverIndex != 2) {
@@ -238,12 +229,9 @@ public class ModeMenu extends AbstractMode {
     private void renderCursor(Canvas c, GraphicsContext gc) {
         gc.save();
         gc.setGlobalAlpha(0.1);
-        //gc.setGlobalBlendMode(BlendMode.OVERLAY);
         gc.setFill(Color.YELLOW);
 
         gc.fillOval(SCREEN_CENTER_X - 10, SCREEN_CENTER_Y - gfxEyeHeight / 4, 20, gfxEyeHeight / 2);
-
-        miniCalc.calc();
 
         gc.fillPolygon(miniCalc.gfxWCursorX, miniCalc.gfxWCursorY, 4);
         gc.fillPolygon(miniCalc.gfxHCursorX, miniCalc.gfxHCursorY, 4);
@@ -289,31 +277,30 @@ public class ModeMenu extends AbstractMode {
             case 0:
                 //TopLeft
                 nextMode = new ModeCalib(this);
-                //nextMode.startMode();
                 this.endMode();
                 break;
             case 1:
                 //TopRight
-                nextMode = new ModeWhackamole(new ModeScore(this));
-                //nextMode.startMode();
+                nextMode = new ModeCalib(new ModeWhackamole(new ModeScore(this)));
                 this.endMode();
                 break;
             case 2:
                 //BottomLeft
-                //nextMode = new ModeHelp;
+                //Help doesn't need a mode
                 break;
             case 3:
                 //BottomRight
-                nextMode = new ModeScore(this);
-                //nextMode.startMode();
-                this.endMode();
-                //FADE SCORES
+                //Debug
+                //nextMode = new ModeScore(this);
+                //this.endMode();
                 break;
         }
     }
 
     private static class miniCalc {
 
+        // Search Light Eyecandy calculations
+        // Uses miniCalib
         static double[] gfxWCursorX = new double[4];
         static double[] gfxWCursorY = new double[4];
         static double[] gfxHCursorX = new double[4];

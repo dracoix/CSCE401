@@ -1,30 +1,25 @@
 package mainapp;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.Glow;
 import javafx.scene.image.Image;
 import javafx.scene.paint.Color;
 import static mainapp.BetterUtils.time;
-import static mainapp.CoreEngine.CANVAS_BACKGROUND_IMAGE;
-import static mainapp.CoreEngine.CANVAS_CURSOR;
-import static mainapp.CoreEngine.CANVAS_SURFACE;
-import static mainapp.CoreEngine.CanvasWipe;
-import static mainapp.CoreEngine.FINAL_SCORE;
-import static mainapp.CoreEngine.SAVE_SCORES;
-import static mainapp.CoreEngine.SCORES;
 import static mainapp.CoreEngine.SCREEN_HEIGHT;
 import static mainapp.CoreEngine.SCREEN_WIDTH;
-import static mainapp.CoreEngine.fntImpact32;
-import static mainapp.CoreEngine.fntImpact48;
-import static mainapp.CoreEngine.getFontWidth;
-import static mainapp.CoreEngine.getGC;
 import static mainapp.CoreEngine.miniCalib.fX;
 import static mainapp.CoreEngine.miniCalib.fY;
 import static mainapp.CoreEngine.miniCalib.resetMiniCalib;
-import static mainapp.CoreEngine.miniCalib.runMiniCalib;
+import static mainapp.CoreRender.CANVAS_BACKGROUND;
+import static mainapp.CoreRender.CANVAS_CURSOR;
+import static mainapp.CoreRender.CANVAS_SURFACE;
+import static mainapp.CoreRender.CanvasWipe;
+import static mainapp.CoreRender.fntImpact32;
+import static mainapp.CoreRender.fntImpact48;
+import static mainapp.CoreRender.getFontWidth;
+import static mainapp.CoreRender.getGC;
 
 public class ModeScore extends AbstractMode {
 
@@ -55,7 +50,7 @@ public class ModeScore extends AbstractMode {
         resetMiniCalib();
         checkCells();
 
-        renderBackground(CANVAS_BACKGROUND_IMAGE);
+        renderBackground(CANVAS_BACKGROUND);
         renderForground(CANVAS_SURFACE);
         renderCursor(CANVAS_CURSOR);
     }
@@ -82,10 +77,7 @@ public class ModeScore extends AbstractMode {
         String compiled = name.get(0).getSelected()
                 + name.get(1).getSelected()
                 + name.get(2).getSelected();
-        SCORES.add(new ScoreEntry(compiled, FINAL_SCORE));
-        Collections.sort(SCORES);
-        SAVE_SCORES();
-        FINAL_SCORE = 0;
+        CoreScores.addNewScoreEntry(compiled);
     }
 
     void scrollers() {

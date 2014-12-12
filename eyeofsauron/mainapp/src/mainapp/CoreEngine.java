@@ -1,56 +1,25 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package mainapp;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javafx.scene.Group;
-import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.effect.BlendMode;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.FillRule;
-import javafx.scene.text.Font;
 import javafx.stage.Screen;
 import static mainapp.BetterMath.rms;
 
-/**
- *
- * @author Expiscor
- */
 public class CoreEngine {
 
+    //True Mouse Location on Screen
     public static final BetterPoint2D SCREEN_MOUSE = new BetterPoint2D();
 
+    //Smoothed Mouse Location on Screen
     public static final BetterPoint2D FUZZY_MOUSE = new BetterPoint2D();
 
-    public static int MASTER_FRAME_TIME = 1000 / 30;
+    //Virtual Mouse Location on Screen
+    public static final BetterPoint2D FUZZY_ADJ_MOUSE = new BetterPoint2D();
 
     public static final double SCREEN_WIDTH = Screen.getPrimary().getBounds().getWidth();
     public static final double SCREEN_HEIGHT = Screen.getPrimary().getBounds().getHeight();
 
     public static final double SCREEN_CENTER_X = SCREEN_WIDTH / 2;
     public static final double SCREEN_CENTER_Y = SCREEN_HEIGHT / 2;
-
-    public static final Group GROUP_ROOT = new Group();
-
-    public static final Scene SCENE_SURFACE = new Scene(GROUP_ROOT, SCREEN_WIDTH, SCREEN_HEIGHT, Color.BLACK);
-    public static final Canvas CANVAS_BACKGROUND_IMAGE = new Canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
-    public static final Canvas CANVAS_SURFACE = new Canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
-    public static final Canvas CANVAS_CURSOR = new Canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
-    public static final Canvas CANVAS_DEBUG = new Canvas(SCREEN_WIDTH, SCREEN_HEIGHT);
 
     public static double CALIB_MIN_X;
     public static double CALIB_MAX_X;
@@ -59,74 +28,20 @@ public class CoreEngine {
     public static byte[] CALIB_ADJ_X = new byte[256];
     public static byte[] CALIB_ADJ_Y = new byte[256];
 
-    public static final Font fntImpact48 = Font.font("Impact", 48);
-    public static final Font fntImpact32 = Font.font("Impact", 32);
-    public static final Font fntImpact24 = Font.font("Impact", 24);
-    public static final Font fntImpact20 = Font.font("Impact", 20);
-    public static final Font fntImpact18 = Font.font("Impact", 18);
+    private static double tmpFuzzyY;
+    private static double tmpFuzzyX;
 
-    public static int FINAL_SCORE;
-    public static ArrayList<ScoreEntry> SCORES = new ArrayList<>();
+    public static double CALIB_ADJ_MIN_Y;
+    public static double CALIB_ADJ_MAX_Y;
+    public static double CALIB_ADJ_MIN_X;
+    public static double CALIB_ADJ_MAX_X;
 
-    public static void SAVE_SCORES() {
-        FileOutputStream fos = null;
-        ObjectOutputStream oos = null;
-        try {
-            File f = new File("scores.dat");
-            fos = new FileOutputStream(f, false);
-            oos = new ObjectOutputStream(fos);
-            oos.writeObject(SCORES);
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(CoreEngine.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(CoreEngine.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                fos.close();
-            } catch (IOException ex) {
-                Logger.getLogger(CoreEngine.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-    }
-    public static void LOAD_SCORES() {
-        FileInputStream fis = null;
-        ObjectInputStream ois = null;
-        try {
-            File f = new File("scores.dat");
-            if (!f.exists()) SAVE_SCORES();
-            fis = new FileInputStream(f);
-            ois = new ObjectInputStream(fis);
-            SCORES = (ArrayList<ScoreEntry>) ois.readObject();
-        } catch (IOException | ClassNotFoundException ex) {
-            SCORES = new ArrayList<>();
-            Logger.getLogger(CoreEngine.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            try {
-                fis.close();
-            } catch (IOException ex) {
-                Logger.getLogger(CoreEngine.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-    }
-
-    
-    
     public static void prepEngine() {
-        GROUP_ROOT.getChildren().add(CANVAS_BACKGROUND_IMAGE);
-        GROUP_ROOT.getChildren().add(CANVAS_SURFACE);
-        GROUP_ROOT.getChildren().add(CANVAS_CURSOR);
-        GROUP_ROOT.getChildren().add(CANVAS_DEBUG);
-        GROUP_ROOT.setBlendMode(BlendMode.SCREEN);
-    }
-
-    public static double calcY() {
-        return ((SCREEN_MOUSE.getY() - CALIB_MIN_Y) / (CALIB_MAX_Y - CALIB_MIN_Y)) * SCREEN_HEIGHT;
-    }
-
-    public static double calcX() {
-        return ((SCREEN_MOUSE.getX() - CALIB_MIN_X) / (CALIB_MAX_X - CALIB_MIN_X)) * SCREEN_WIDTH;
+        CoreRender.GROUP_ROOT.getChildren().add(CoreRender.CANVAS_BACKGROUND);
+        CoreRender.GROUP_ROOT.getChildren().add(CoreRender.CANVAS_SURFACE);
+        CoreRender.GROUP_ROOT.getChildren().add(CoreRender.CANVAS_CURSOR);
+        CoreRender.GROUP_ROOT.getChildren().add(CoreRender.CANVAS_DEBUG);
+        CoreRender.GROUP_ROOT.setBlendMode(BlendMode.SCREEN);
     }
 
     public static double calcFuzzyY() {
@@ -141,10 +56,6 @@ public class CoreEngine {
         return tmpFuzzyY;
     }
 
-    public static final BetterPoint2D FUZZY_ADJ_MOUSE = new BetterPoint2D();
-    private static double tmpFuzzyY;
-    private static double tmpFuzzyX;
-
     public static void tickFuzzyAdj() {
         FUZZY_ADJ_MOUSE.set(calcFuzzyX(), calcFuzzyY());
     }
@@ -158,14 +69,6 @@ public class CoreEngine {
             tmpFuzzyX = SCREEN_WIDTH;
         }
         return tmpFuzzyX;
-    }
-
-    public static double getFontWidth(GraphicsContext gc, String s) {
-        return com.sun.javafx.tk.Toolkit.getToolkit().getFontLoader().computeStringWidth(s, gc.getFont());
-    }
-
-    public static double getFontHeight(GraphicsContext gc) {
-        return com.sun.javafx.tk.Toolkit.getToolkit().getFontLoader().getFontMetrics(gc.getFont()).getLineHeight();
     }
 
     public static void resetCalib() {
@@ -199,16 +102,9 @@ public class CoreEngine {
 
         CALIB_ADJ_X[(int) (255 * (FUZZY_MOUSE.getX() / SCREEN_WIDTH))] = 1;
         CALIB_ADJ_Y[(int) (255 * (FUZZY_MOUSE.getY() / SCREEN_HEIGHT))] = 1;
-
     }
 
-    public static double CALIB_ADJ_MIN_Y;
-    public static double CALIB_ADJ_MAX_Y;
-    public static double CALIB_ADJ_MIN_X;
-    public static double CALIB_ADJ_MAX_X;
-
     public static void endCalib() {
-
         CALIB_ADJ_MIN_Y = SCREEN_HEIGHT / 2;
         CALIB_ADJ_MAX_Y = SCREEN_HEIGHT / 2;
         CALIB_ADJ_MIN_X = SCREEN_WIDTH / 2;
@@ -237,33 +133,12 @@ public class CoreEngine {
                 CALIB_ADJ_MAX_Y = rms(CALIB_ADJ_MAX_Y, ((double) y * SCREEN_HEIGHT / 255));
             }
         }
-
-    }
-
-    public static GraphicsContext getGC(Canvas c) {
-        return c.getGraphicsContext2D();
-    }
-
-    public static void CanvasWipe(Canvas c) {
-        c.getGraphicsContext2D().clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-    }
-
-    public static void CanvasWipe(GraphicsContext gc) {
-        gc.clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-    }
-
-    public static void CanvasFade(Canvas c, double delta) {
-        c.getGraphicsContext2D().setFill(Color.BLACK.interpolate(Color.TRANSPARENT, delta));
-    }
-
-    public static void CanvasReset(Canvas c) {
-        CanvasWipe(c);
-        c.setBlendMode(null);
-        c.setEffect(null);
     }
 
     static class miniCalib {
-
+        // Dynamic live calibration for simple tasks
+        // Used on menu and score entry
+        
         public static double maxX;
         public static double maxY;
         public static double minX;
@@ -308,27 +183,19 @@ public class CoreEngine {
             }
 
             if (fX > (SCREEN_WIDTH * 5 / 6)) {
-                //fX *=1;
                 fX = (SCREEN_WIDTH * 5 / 6);
-                //fX /= 2;
             }
 
             if (fX < (SCREEN_WIDTH * 1 / 6)) {
-                //fX *=1;
                 fX = (SCREEN_WIDTH * 1 / 6);
-                //fX /= 2;
             }
 
             if (fY > (SCREEN_HEIGHT * 5 / 6)) {
-                //fY *=1;
                 fY = (SCREEN_HEIGHT * 5 / 6);
-                //fY /= 2;
             }
 
             if (fY < (SCREEN_HEIGHT * 1 / 6)) {
-                //fY *=1;
                 fY = (SCREEN_HEIGHT * 1 / 6);
-                //fY /= 2;
             }
 
         }

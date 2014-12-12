@@ -1,5 +1,6 @@
 package mainapp;
 
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 
 public class RenderObject extends BetterObject {
@@ -25,7 +26,6 @@ public class RenderObject extends BetterObject {
     }
 
     public BetterPoint2D getRenderPosition() {
-        renderPosition.set(this.position.getX() - this.width() / 2, this.position.getY() - this.height() / 2);
         return renderPosition;
     }
 
@@ -38,9 +38,22 @@ public class RenderObject extends BetterObject {
     }
 
     public void tick() {
-
+        if (this.currentFrame == null) return;
+        renderPosition.set(this.position.getX() - this.centerW(), this.position.getY() - this.centerH());
     }
 
+    public void render(GraphicsContext gc)
+    {
+        if (this.currentFrame== null) return;
+        gc.drawImage(currentFrame, renderPosition.getX(), renderPosition.getY());
+    }
+    
+    public void renderPost(GraphicsContext gc)
+    {
+        this.tick();
+        render(gc);
+    }
+    
     public double centerW() {
         return this.width() / 2;
     }
